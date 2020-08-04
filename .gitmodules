@@ -1,0 +1,3 @@
+[submodule "src/ext-ICCAD2020-ProblemA"]
+	path = src/ext-ICCAD2020-ProblemA
+	url = https://github.com/WangYuNeng/ICCAD2020-ProblemA.git
