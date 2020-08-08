@@ -21,6 +21,7 @@
 #include "fra.h"
 #include "sat/cnf/cnf.h"
 #include "sat/bsat/satSolver2.h"
+#include "ext-ICCAD2020-ProblemA/xcec.h"
 
 ABC_NAMESPACE_IMPL_START
 
@@ -163,7 +164,7 @@ int Fra_FraigSat( Aig_Man_t * pMan, ABC_INT64_T nConfLimit, ABC_INT64_T nInsLimi
     }
     else
     {
-        sat_solver * pSat;
+        void * pSat;
         Cnf_Dat_t * pCnf;
         int status, RetValue = 0;
         abctime clk = Abc_Clock();
@@ -186,67 +187,19 @@ int Fra_FraigSat( Aig_Man_t * pMan, ABC_INT64_T nConfLimit, ABC_INT64_T nInsLimi
         }
 
         // convert into SAT solver
-        pSat = (sat_solver *)Cnf_DataWriteIntoSolver( pCnf, 1, 0 );
+        pSat = Xcec_create_miter_solver(pCnf, 1);
         if ( pSat == NULL )
         {
             Cnf_DataFree( pCnf );
             return 1;
         }
 
-        if ( nLearnedStart )
-            pSat->nLearntStart = pSat->nLearntMax = nLearnedStart;
-        if ( nLearnedDelta )
-            pSat->nLearntDelta = nLearnedDelta;
-        if ( nLearnedPerce )
-            pSat->nLearntRatio = nLearnedPerce;
-        if ( fVerbose )
-            pSat->fVerbose = fVerbose;
-
-        if ( fAndOuts )
-        {
-            // assert each output independently
-            if ( !Cnf_DataWriteAndClauses( pSat, pCnf ) )
-            {
-                sat_solver_delete( pSat );
-                Cnf_DataFree( pCnf );
-                return 1;
-            }
-        }
-        else
-        {
-            // add the OR clause for the outputs
-            if ( !Cnf_DataWriteOrClause( pSat, pCnf ) )
-            {
-                sat_solver_delete( pSat );
-                Cnf_DataFree( pCnf );
-                return 1;
-            }
-        }
         vCiIds = Cnf_DataCollectPiSatNums( pCnf, pMan );
         Cnf_DataFree( pCnf );
 
-
-    //    printf( "Created SAT problem with %d variable and %d clauses. ", sat_solver_nvars(pSat), sat_solver_nclauses(pSat) );
-    //    ABC_PRT( "Time", Abc_Clock() - clk );
-
-        // simplify the problem
-        clk = Abc_Clock();
-        status = sat_solver_simplify(pSat);
-    //    printf( "Simplified the problem to %d variables and %d clauses. ", sat_solver_nvars(pSat), sat_solver_nclauses(pSat) );
-    //    ABC_PRT( "Time", Abc_Clock() - clk );
-        if ( status == 0 )
-        {
-            Vec_IntFree( vCiIds );
-            sat_solver_delete( pSat );
-    //        printf( "The problem is UNSATISFIABLE after simplification.\n" );
-            return 1;
-        }
-
         // solve the miter
         clk = Abc_Clock();
-//        if ( fVerbose )
-//            pSat->verbosity = 1;
-        status = sat_solver_solve( pSat, NULL, NULL, (ABC_INT64_T)nConfLimit, (ABC_INT64_T)nInsLimit, (ABC_INT64_T)0, (ABC_INT64_T)0 );
+        status = Xcec_miter_solver_solve(pSat);
         if ( status == l_Undef )
         {
     //        printf( "The problem timed out.\n" );
@@ -264,21 +217,14 @@ int Fra_FraigSat( Aig_Man_t * pMan, ABC_INT64_T nConfLimit, ABC_INT64_T nInsLimi
         }
         else
             assert( 0 );
-
-    //    Abc_Print( 1, "The number of conflicts = %6d.  ", (int)pSat->stats.conflicts );
-    //    Abc_PrintTime( 1, "Solving time", Abc_Clock() - clk );
  
         // if the problem is SAT, get the counterexample
         if ( status == l_True )
         {
-            pMan->pData = Sat_SolverGetModel( pSat, vCiIds->pArray, vCiIds->nSize );
+            pMan->pData = Xcec_mitersolver_get_model( pSat, vCiIds->pArray, vCiIds->nSize );
         }
         // free the sat_solver
-        if ( fVerbose )
-            Sat_SolverPrintStats( stdout, pSat );
-    //sat_solver_store_write( pSat, "trace.cnf" );
-    //sat_solver_store_free( pSat );
-        sat_solver_delete( pSat );
+        Xcec_miter_solver_delete( pSat );
         Vec_IntFree( vCiIds );
         return RetValue;
     }
@@ -344,7 +290,8 @@ int Fra_FraigCec( Aig_Man_t ** ppAig, int nConfLimit, int fVerbose )
 
     // if SAT only, solve without iteration
 clk = Abc_Clock();
-    RetValue = Fra_FraigSat( pAig, (ABC_INT64_T)2*nBTLimitStart, (ABC_INT64_T)0, 0, 0, 0, 1, 0, 0, 0 );
+    RetValue = -1;
+    // RetValue = Fra_FraigSat( pAig, (ABC_INT64_T)2*nBTLimitStart, (ABC_INT64_T)0, 0, 0, 0, 1, 0, 0, 0 );
     if ( fVerbose )
     {
         printf( "Initial SAT:      Nodes = %6d.  ", Aig_ManNodeNum(pAig) );
@@ -369,7 +316,7 @@ ABC_PRT( "Time", Abc_Clock() - clk );
     pParams->nBTLimitMiter = nBTLimitStart;
     pParams->fDontShowBar = 1;
     pParams->fProve = 1;
-    for ( i = 0; i < 6; i++ )
+    for ( i = 0; i < 4; i++ )
     {
 //printf( "Running fraiging with %d BTnode and %d BTmiter.\n", pParams->nBTLimitNode, pParams->nBTLimitMiter );
         // try XOR balancing
@@ -420,7 +367,7 @@ ABC_PRT( "Time", Abc_Clock() - clk );
         pParams->nBTLimitNode = 8 * pParams->nBTLimitNode;
         pParams->nBTLimitMiter = 2 * pParams->nBTLimitMiter;
     }
-
+    Ioa_WriteAiger( pAig, "miter.aig", 0, 0 );
     // if still unsolved try last gasp
     if ( RetValue == -1 )
     {

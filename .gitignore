@@ -58,3 +58,7 @@ tags
 
 /cmake
 /cscope
+
+.gitignore
+Dockerfile
+.devcontainer/

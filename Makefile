@@ -54,7 +54,7 @@ endif
 
 ARCHFLAGS := $(ARCHFLAGS)
 
-OPTFLAGS  ?= -g -O
+OPTFLAGS  ?= -O3
 
 CFLAGS    += -Wall -Wno-unused-function -Wno-write-strings -Wno-sign-compare $(ARCHFLAGS)
 ifneq ($(findstring arm,$(shell uname -m)),)
@@ -212,6 +212,8 @@ tags:
 	etags `find . -type f -regex '.*\.\(c\|h\)'`
 
 $(PROG): $(OBJ)
+	@echo "$(MSG_PREFIX)\`\` Building extra library:" $(EXTRA_LIB_NAME)
+	$(MAKE) -C $(EXTRA_LIB)
 	@echo "$(MSG_PREFIX)\`\` Building binary:" $(notdir $@)
 	$(VERBOSE)$(LD) -o $@ $^ $(LDFLAGS) $(LIBS)
 
