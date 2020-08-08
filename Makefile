@@ -212,8 +212,9 @@ tags:
 	etags `find . -type f -regex '.*\.\(c\|h\)'`
 
 $(PROG): $(OBJ)
-	@echo "$(MSG_PREFIX)\`\` Building extra library:" $(EXTRA_LIB_NAME)
+	@echo "$(MSG_PREFIX)\`\` Building extra library:" $(EXTRA_LIB_NAME) $(EXTRA_LIB_NAME2)
 	$(MAKE) -C $(EXTRA_LIB)
+	cd $(EXTRA_LIB2) && $(MAKE) $(EXTRA_LIB2_FLAG)
 	@echo "$(MSG_PREFIX)\`\` Building binary:" $(notdir $@)
 	$(VERBOSE)$(LD) -o $@ $^ $(LDFLAGS) $(LIBS)
 
