@@ -316,7 +316,7 @@ ABC_PRT( "Time", Abc_Clock() - clk );
     pParams->nBTLimitMiter = nBTLimitStart;
     pParams->fDontShowBar = 1;
     pParams->fProve = 1;
-    for ( i = 0; i < 4; i++ )
+    for ( i = 0; i < 6; i++ )
     {
 //printf( "Running fraiging with %d BTnode and %d BTmiter.\n", pParams->nBTLimitNode, pParams->nBTLimitMiter );
         // try XOR balancing
@@ -367,7 +367,6 @@ ABC_PRT( "Time", Abc_Clock() - clk );
         pParams->nBTLimitNode = 8 * pParams->nBTLimitNode;
         pParams->nBTLimitMiter = 2 * pParams->nBTLimitMiter;
     }
-    Ioa_WriteAiger( pAig, "miter.aig", 0, 0 );
     // if still unsolved try last gasp
     if ( RetValue == -1 )
     {
