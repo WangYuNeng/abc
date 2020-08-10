@@ -514,10 +514,10 @@ int Fra_SetActivityFactors_rec( Fra_Man_t * p, Aig_Obj_t * pObj, int LevelMin, i
         return 0;
     // set the factor of this variable
     // (LevelMax-LevelMin) / (pObj->Level-LevelMin) = p->pPars->dActConeBumpMax / ThisBump
-    if ( p->pSat->factors == NULL )
-        p->pSat->factors = ABC_CALLOC( double, p->pSat->cap );
-    p->pSat->factors[Fra_ObjSatNum(pObj)] = p->pPars->dActConeBumpMax * (pObj->Level - LevelMin)/(LevelMax - LevelMin);
-    veci_push(&p->pSat->act_vars, Fra_ObjSatNum(pObj));
+    // if ( p->pSat->factors == NULL )
+        // p->pSat->factors = ABC_CALLOC( double, p->pSat->cap );
+    Xcec_fraig_sat_solver_set_factor(p->pSat, Fra_ObjSatNum(pObj), p->pPars->dActConeBumpMax * (pObj->Level - LevelMin)/(LevelMax - LevelMin));
+    // veci_push(&p->pSat->act_vars, Fra_ObjSatNum(pObj));
     // explore the fanins
     vFanins = Fra_ObjFaninVec( pObj );
     Vec_PtrForEachEntry( Aig_Obj_t *, vFanins, pFanin, i )
@@ -543,7 +543,7 @@ int Fra_SetActivityFactors( Fra_Man_t * p, Aig_Obj_t * pOld, Aig_Obj_t * pNew )
     assert( pOld || pNew );
 clk = Abc_Clock(); 
     // reset the active variables
-    veci_resize(&p->pSat->act_vars, 0);
+    // veci_resize(&p->pSat->act_vars, 0);
     // prepare for traversal
     Aig_ManIncrementTravId( p->pManFraig );
     // determine the min and max level to visit

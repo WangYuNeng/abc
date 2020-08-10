@@ -252,7 +252,7 @@ void Fra_ManStop( Fra_Man_t * p )
     Fra_ManClean( p, 0 );
     if ( p->vTimeouts ) Vec_PtrFree( p->vTimeouts );
     if ( p->vPiVars )   Vec_PtrFree( p->vPiVars );
-    if ( p->pSat )      sat_solver_delete( p->pSat );
+    if ( p->pSat )      Xcec_fraig_sat_solver_delete( p->pSat );
     if ( p->pCla  )     Fra_ClassesStop( p->pCla );
     if ( p->pSml )      Fra_SmlStop( p->pSml );
     if ( p->vCex )      Vec_IntFree( p->vCex );
