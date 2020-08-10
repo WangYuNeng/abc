@@ -20,6 +20,7 @@
 
 #include <math.h>
 #include "fra.h"
+#include "ext-ICCAD2020-ProblemA/xcec.h"
 
 ABC_NAMESPACE_IMPL_START
 
@@ -76,12 +77,12 @@ int Fra_NodesAreEquiv( Fra_Man_t * p, Aig_Obj_t * pOld, Aig_Obj_t * pNew )
     // make sure the solver is allocated and has enough variables
     if ( p->pSat == NULL )
     {
-        p->pSat = sat_solver_new();
+        p->pSat = Xcec_fraig_sat_solver_new();
         p->nSatVars = 1;
-        sat_solver_setnvars( p->pSat, 1000 );
+        Xcec_fraig_sat_solver_setnvars( p->pSat, 1000 );
         // var 0 is reserved for const1 node - add the clause
         pLits[0] = toLit( 0 );
-        sat_solver_addclause( p->pSat, pLits, pLits + 1 );
+        Xcec_fraig_sat_solver_addclause( p->pSat, pLits, pLits + 1 );
     }
 
     // if the nodes do not have SAT variables, allocate them
@@ -89,14 +90,14 @@ int Fra_NodesAreEquiv( Fra_Man_t * p, Aig_Obj_t * pOld, Aig_Obj_t * pNew )
 
     if ( p->pSat->qtail != p->pSat->qhead )
     {
-        status = sat_solver_simplify(p->pSat);
+        status = Xcec_fraig_sat_solver_simplify(p->pSat);
         assert( status != 0 );
-        assert( p->pSat->qtail == p->pSat->qhead );
+        // assert( p->pSat->qtail == p->pSat->qhead );
     }
 
     // prepare variable activity
-    if ( p->pPars->fConeBias )
-        Fra_SetActivityFactors( p, pOld, pNew ); 
+    // if ( p->pPars->fConeBias )
+        // Fra_SetActivityFactors( p, pOld, pNew ); 
 
     // solve under assumptions
     // A = 1; B = 0     OR     A = 1; B = 1 
@@ -104,16 +105,15 @@ clk = Abc_Clock();
     pLits[0] = toLitCond( Fra_ObjSatNum(pOld), 0 );
     pLits[1] = toLitCond( Fra_ObjSatNum(pNew), pOld->fPhase == pNew->fPhase );
 //Sat_SolverWriteDimacs( p->pSat, "temp.cnf", pLits, pLits + 2, 1 );
-    RetValue1 = sat_solver_solve( p->pSat, pLits, pLits + 2, 
-        (ABC_INT64_T)nBTLimit, (ABC_INT64_T)0, 
-        p->nBTLimitGlobal, p->nInsLimitGlobal );
+    RetValue1 = Xcec_fraig_sat_solver_solve( p->pSat, pLits, pLits + 2, 
+        (ABC_INT64_T)nBTLimit);
 p->timeSat += Abc_Clock() - clk;
     if ( RetValue1 == l_False )
     {
 p->timeSatUnsat += Abc_Clock() - clk;
         pLits[0] = lit_neg( pLits[0] );
         pLits[1] = lit_neg( pLits[1] );
-        RetValue = sat_solver_addclause( p->pSat, pLits, pLits + 2 );
+        RetValue = Xcec_fraig_sat_solver_addclause( p->pSat, pLits, pLits + 2 );
         assert( RetValue );
         // continue solving the other implication
         p->nSatCallsUnsat++;
@@ -148,16 +148,15 @@ p->timeSatFail += Abc_Clock() - clk;
 clk = Abc_Clock();
     pLits[0] = toLitCond( Fra_ObjSatNum(pOld), 1 );
     pLits[1] = toLitCond( Fra_ObjSatNum(pNew), pOld->fPhase ^ pNew->fPhase );
-    RetValue1 = sat_solver_solve( p->pSat, pLits, pLits + 2, 
-        (ABC_INT64_T)nBTLimit, (ABC_INT64_T)0, 
-        p->nBTLimitGlobal, p->nInsLimitGlobal );
+    RetValue1 = Xcec_fraig_sat_solver_solve( p->pSat, pLits, pLits + 2, 
+        (ABC_INT64_T)nBTLimit);
 p->timeSat += Abc_Clock() - clk;
     if ( RetValue1 == l_False )
     {
 p->timeSatUnsat += Abc_Clock() - clk;
         pLits[0] = lit_neg( pLits[0] );
         pLits[1] = lit_neg( pLits[1] );
-        RetValue = sat_solver_addclause( p->pSat, pLits, pLits + 2 );
+        RetValue = Xcec_fraig_sat_solver_addclause( p->pSat, pLits, pLits + 2 );
         assert( RetValue );
         p->nSatCallsUnsat++;
     }

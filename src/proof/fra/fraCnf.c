@@ -19,6 +19,7 @@
 ***********************************************************************/
 
 #include "fra.h"
+#include "ext-ICCAD2020-ProblemA/xcec.h"
 
 ABC_NAMESPACE_IMPL_START
 
@@ -72,22 +73,22 @@ void Fra_AddClausesMux( Fra_Man_t * p, Aig_Obj_t * pNode )
     pLits[0] = toLitCond(VarI, 1);
     pLits[1] = toLitCond(VarT, 1^fCompT);
     pLits[2] = toLitCond(VarF, 0);
-    RetValue = sat_solver_addclause( p->pSat, pLits, pLits + 3 );
+    RetValue = Xcec_fraig_sat_solver_addclause( p->pSat, pLits, pLits + 3 );
     assert( RetValue );
     pLits[0] = toLitCond(VarI, 1);
     pLits[1] = toLitCond(VarT, 0^fCompT);
     pLits[2] = toLitCond(VarF, 1);
-    RetValue = sat_solver_addclause( p->pSat, pLits, pLits + 3 );
+    RetValue = Xcec_fraig_sat_solver_addclause( p->pSat, pLits, pLits + 3 );
     assert( RetValue );
     pLits[0] = toLitCond(VarI, 0);
     pLits[1] = toLitCond(VarE, 1^fCompE);
     pLits[2] = toLitCond(VarF, 0);
-    RetValue = sat_solver_addclause( p->pSat, pLits, pLits + 3 );
+    RetValue = Xcec_fraig_sat_solver_addclause( p->pSat, pLits, pLits + 3 );
     assert( RetValue );
     pLits[0] = toLitCond(VarI, 0);
     pLits[1] = toLitCond(VarE, 0^fCompE);
     pLits[2] = toLitCond(VarF, 1);
-    RetValue = sat_solver_addclause( p->pSat, pLits, pLits + 3 );
+    RetValue = Xcec_fraig_sat_solver_addclause( p->pSat, pLits, pLits + 3 );
     assert( RetValue );
 
     // two additional clauses
@@ -106,12 +107,12 @@ void Fra_AddClausesMux( Fra_Man_t * p, Aig_Obj_t * pNode )
     pLits[0] = toLitCond(VarT, 0^fCompT);
     pLits[1] = toLitCond(VarE, 0^fCompE);
     pLits[2] = toLitCond(VarF, 1);
-    RetValue = sat_solver_addclause( p->pSat, pLits, pLits + 3 );
+    RetValue = Xcec_fraig_sat_solver_addclause( p->pSat, pLits, pLits + 3 );
     assert( RetValue );
     pLits[0] = toLitCond(VarT, 1^fCompT);
     pLits[1] = toLitCond(VarE, 1^fCompE);
     pLits[2] = toLitCond(VarF, 0);
-    RetValue = sat_solver_addclause( p->pSat, pLits, pLits + 3 );
+    RetValue = Xcec_fraig_sat_solver_addclause( p->pSat, pLits, pLits + 3 );
     assert( RetValue );
 }
 
@@ -141,14 +142,14 @@ void Fra_AddClausesSuper( Fra_Man_t * p, Aig_Obj_t * pNode, Vec_Ptr_t * vSuper )
     {
         pLits[0] = toLitCond(Fra_ObjSatNum(Aig_Regular(pFanin)), Aig_IsComplement(pFanin));
         pLits[1] = toLitCond(Fra_ObjSatNum(pNode), 1);
-        RetValue = sat_solver_addclause( p->pSat, pLits, pLits + 2 );
+        RetValue = Xcec_fraig_sat_solver_addclause( p->pSat, pLits, pLits + 2 );
         assert( RetValue );
     }
     // add A & B => C   or   !A + !B + C
     Vec_PtrForEachEntry( Aig_Obj_t *, vSuper, pFanin, i )
         pLits[i] = toLitCond(Fra_ObjSatNum(Aig_Regular(pFanin)), !Aig_IsComplement(pFanin));
     pLits[nLits-1] = toLitCond(Fra_ObjSatNum(pNode), 0);
-    RetValue = sat_solver_addclause( p->pSat, pLits, pLits + nLits );
+    RetValue = Xcec_fraig_sat_solver_addclause( p->pSat, pLits, pLits + nLits );
     assert( RetValue );
     ABC_FREE( pLits );
 }

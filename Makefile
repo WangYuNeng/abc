@@ -214,7 +214,7 @@ tags:
 $(PROG): $(OBJ)
 	@echo "$(MSG_PREFIX)\`\` Building extra library:" $(EXTRA_LIB_NAME) $(EXTRA_LIB_NAME2)
 	$(MAKE) -C $(EXTRA_LIB)
-	cd $(EXTRA_LIB2) && $(MAKE) $(EXTRA_LIB2_FLAG)
+	cd $(EXTRA_LIB2) && $(MAKE)
 	@echo "$(MSG_PREFIX)\`\` Building binary:" $(notdir $@)
 	$(VERBOSE)$(LD) -o $@ $^ $(LDFLAGS) $(LIBS)
 
