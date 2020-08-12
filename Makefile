@@ -156,7 +156,7 @@ CXXFLAGS += $(CFLAGS)
 SRC  :=
 GARBAGE := core core.* *.stackdump ./tags $(PROG) arch_flags
 
-.PHONY: all default tags clean docs cmake_info
+.PHONY: all default tags clean docs cmake_info extra
 
 include $(patsubst %, $(ABCSRC)/%/module.make, $(MODULES))
 
@@ -197,7 +197,9 @@ DEP := $(OBJ:.o=.d)
 	$(VERBOSE)$(ABCSRC)/depends.sh $(CXX) `dirname $*.cpp` $(OPTFLAGS) $(INCLUDES) $(CXXFLAGS) $< > $@
 
 ifndef ABC_MAKE_NO_DEPS
+ifneq (extra,$(firstword $(MAKECMDGOALS)))
 -include $(DEP)
+endif
 endif
 
 # Actual targets
@@ -211,10 +213,14 @@ clean:
 tags:
 	etags `find . -type f -regex '.*\.\(c\|h\)'`
 
-$(PROG): $(OBJ)
-	@echo "$(MSG_PREFIX)\`\` Building extra library:" $(EXTRA_LIB_NAME) $(EXTRA_LIB_NAME2)
+extra:
+	@echo "$(MSG_PREFIX)\`\` Building extra library:" $(EXTRA_LIB_NAME)
 	$(MAKE) -C $(EXTRA_LIB)
-	cd $(EXTRA_LIB2) && $(MAKE)
+	@echo "$(MSG_PREFIX)\`\` Building extra library:" $(EXTRA_LIB2_NAME)
+	mkdir -p $(EXTRA_LIB2)
+	cd $(EXTRA_LIB2) && cmake ../ -DNOZLIB=ON -DNOM4RI=ON -DSTATS=OFF -DNOVALGRIND=ON -DSTATICCOMPILE=ON && $(MAKE)
+
+$(PROG): $(OBJ)
 	@echo "$(MSG_PREFIX)\`\` Building binary:" $(notdir $@)
 	$(VERBOSE)$(LD) -o $@ $^ $(LDFLAGS) $(LIBS)
 
