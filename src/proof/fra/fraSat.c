@@ -90,8 +90,8 @@ int Fra_NodesAreEquiv( Fra_Man_t * p, Aig_Obj_t * pOld, Aig_Obj_t * pNew )
 
     if ( p->pSat->qtail != p->pSat->qhead )
     {
-        status = Xcec_fraig_sat_solver_simplify(p->pSat);
-        assert( status != 0 );
+        // status = Xcec_fraig_sat_solver_simplify(p->pSat);
+        // assert( status != 0 );
         // assert( p->pSat->qtail == p->pSat->qhead );
     }
 
