@@ -218,7 +218,7 @@ extra:
 	$(MAKE) -C $(EXTRA_LIB)
 	@echo "$(MSG_PREFIX)\`\` Building extra library:" $(EXTRA_LIB2_NAME)
 	mkdir -p $(EXTRA_LIB2)
-	cd $(EXTRA_LIB2) && cmake ../ -DNOZLIB=ON -DNOM4RI=ON -DSTATS=OFF -DNOVALGRIND=ON -DSTATICCOMPILE=ON && $(MAKE)
+	cd $(EXTRA_LIB2) && cmake ../ -DNOZLIB=ON -DNOM4RI=ON -DSTATS=OFF -DNOVALGRIND=ON -DSTATICCOMPILE=ON -DWEIGHTED_SAMPLING=ON && $(MAKE)
 
 $(PROG): $(OBJ)
 	@echo "$(MSG_PREFIX)\`\` Building binary:" $(notdir $@)
