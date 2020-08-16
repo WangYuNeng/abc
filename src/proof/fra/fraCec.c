@@ -187,19 +187,23 @@ int Fra_FraigSat( Aig_Man_t * pMan, ABC_INT64_T nConfLimit, ABC_INT64_T nInsLimi
         }
 
         // convert into SAT solver
-        pSat = Xcec_create_miter_solver(pCnf, 1);
+        // pSat = Xcec_create_miter_solver(pCnf, 1);
+        pSat = Cnf_DataWriteIntoSolver( pCnf, 1, 0 );
         if ( pSat == NULL )
         {
             Cnf_DataFree( pCnf );
             return 1;
         }
 
+        Cnf_DataWriteOrClause( pSat, pCnf );
         vCiIds = Cnf_DataCollectPiSatNums( pCnf, pMan );
         Cnf_DataFree( pCnf );
 
         // solve the miter
         clk = Abc_Clock();
-        status = Xcec_miter_solver_solve(pSat);
+        Xcec_fraig_sat_solver_simplify(pSat);
+        // status = Xcec_miter_solver_solve(pSat);
+        status = Xcec_fraig_sat_solver_solve( pSat, NULL, NULL, (ABC_INT64_T)__INT64_MAX__ );
         if ( status == l_Undef )
         {
     //        printf( "The problem timed out.\n" );
@@ -221,7 +225,8 @@ int Fra_FraigSat( Aig_Man_t * pMan, ABC_INT64_T nConfLimit, ABC_INT64_T nInsLimi
         // if the problem is SAT, get the counterexample
         if ( status == l_True )
         {
-            pMan->pData = Xcec_mitersolver_get_model( pSat, vCiIds->pArray, vCiIds->nSize );
+            pMan->pData = Sat_SolverGetModel( (sat_solver *)pSat, vCiIds->pArray, vCiIds->nSize );
+            // pMan->pData = Xcec_mitersolver_get_model( pSat, vCiIds->pArray, vCiIds->nSize );
         }
         // free the sat_solver
         Xcec_miter_solver_delete( pSat );

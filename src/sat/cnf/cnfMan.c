@@ -22,6 +22,7 @@
 #include "sat/bsat/satSolver.h"
 #include "sat/bsat/satSolver2.h"
 #include "misc/zlib/zlib.h"
+#include "ext-ICCAD2020-ProblemA/xcec.h"
 
 ABC_NAMESPACE_IMPL_START
 
@@ -369,17 +370,17 @@ void Cnf_DataWriteIntoFile( Cnf_Dat_t * p, char * pFileName, int fReadable, Vec_
 ***********************************************************************/
 void * Cnf_DataWriteIntoSolverInt( void * pSolver, Cnf_Dat_t * p, int nFrames, int fInit )
 {
-    sat_solver * pSat = (sat_solver *)pSolver;
+    void * pSat = pSolver;
     int i, f, status;
     assert( nFrames > 0 );
     assert( pSat );
 //    pSat = sat_solver_new();
-    sat_solver_setnvars( pSat, p->nVars * nFrames );
+    Xcec_fraig_sat_solver_setnvars( pSat, p->nVars * nFrames );
     for ( i = 0; i < p->nClauses; i++ )
     {
-        if ( !sat_solver_addclause( pSat, p->pClauses[i], p->pClauses[i+1] ) )
+        if ( !Xcec_fraig_sat_solver_addclause( pSat, p->pClauses[i], p->pClauses[i+1] ) )
         {
-            sat_solver_delete( pSat );
+            Xcec_fraig_sat_solver_delete( pSat );
             return NULL;
         }
     }
@@ -396,16 +397,16 @@ void * Cnf_DataWriteIntoSolverInt( void * pSolver, Cnf_Dat_t * p, int nFrames, i
             {
                 Lits[0] = (f-1)*nLitsAll + toLitCond( p->pVarNums[pObjLi->Id], 0 );
                 Lits[1] =  f   *nLitsAll + toLitCond( p->pVarNums[pObjLo->Id], 1 );
-                if ( !sat_solver_addclause( pSat, Lits, Lits + 2 ) )
+                if ( !Xcec_fraig_sat_solver_addclause( pSat, Lits, Lits + 2 ) )
                 {
-                    sat_solver_delete( pSat );
+                    Xcec_fraig_sat_solver_delete( pSat );
                     return NULL;
                 }
                 Lits[0]++;
                 Lits[1]--;
-                if ( !sat_solver_addclause( pSat, Lits, Lits + 2 ) )
+                if ( !Xcec_fraig_sat_solver_addclause( pSat, Lits, Lits + 2 ) )
                 {
-                    sat_solver_delete( pSat );
+                    Xcec_fraig_sat_solver_delete( pSat );
                     return NULL;
                 }
             }
@@ -414,9 +415,9 @@ void * Cnf_DataWriteIntoSolverInt( void * pSolver, Cnf_Dat_t * p, int nFrames, i
                 pLits[i] += nLitsAll;
             for ( i = 0; i < p->nClauses; i++ )
             {
-                if ( !sat_solver_addclause( pSat, p->pClauses[i], p->pClauses[i+1] ) )
+                if ( !Xcec_fraig_sat_solver_addclause( pSat, p->pClauses[i], p->pClauses[i+1] ) )
                 {
-                    sat_solver_delete( pSat );
+                    Xcec_fraig_sat_solver_delete( pSat );
                     return NULL;
                 }
             }
@@ -433,17 +434,17 @@ void * Cnf_DataWriteIntoSolverInt( void * pSolver, Cnf_Dat_t * p, int nFrames, i
         Aig_ManForEachLoSeq( p->pMan, pObjLo, i )
         {
             Lits[0] = toLitCond( p->pVarNums[pObjLo->Id], 1 );
-            if ( !sat_solver_addclause( pSat, Lits, Lits + 1 ) )
+            if ( !Xcec_fraig_sat_solver_addclause( pSat, Lits, Lits + 1 ) )
             {
-                sat_solver_delete( pSat );
+                Xcec_fraig_sat_solver_delete( pSat );
                 return NULL;
             }
         }
     }
-    status = sat_solver_simplify(pSat);
+    status = Xcec_fraig_sat_solver_simplify(pSat);
     if ( status == 0 )
     {
-        sat_solver_delete( pSat );
+        Xcec_fraig_sat_solver_delete( pSat );
         return NULL;
     }
     return pSat;
@@ -462,7 +463,7 @@ void * Cnf_DataWriteIntoSolverInt( void * pSolver, Cnf_Dat_t * p, int nFrames, i
 ***********************************************************************/
 void * Cnf_DataWriteIntoSolver( Cnf_Dat_t * p, int nFrames, int fInit )
 {
-    return Cnf_DataWriteIntoSolverInt( sat_solver_new(), p, nFrames, fInit );
+    return Cnf_DataWriteIntoSolverInt( Xcec_fraig_sat_solver_new(), p, nFrames, fInit );
 }
 
 /**Function*************************************************************
@@ -570,13 +571,13 @@ void * Cnf_DataWriteIntoSolver2( Cnf_Dat_t * p, int nFrames, int fInit )
 ***********************************************************************/
 int Cnf_DataWriteOrClause( void * p, Cnf_Dat_t * pCnf )
 {
-    sat_solver * pSat = (sat_solver *)p;
+    void * pSat = p;
     Aig_Obj_t * pObj;
     int i, * pLits;
     pLits = ABC_ALLOC( int, Aig_ManCoNum(pCnf->pMan) );
     Aig_ManForEachCo( pCnf->pMan, pObj, i )
         pLits[i] = toLitCond( pCnf->pVarNums[pObj->Id], 0 );
-    if ( !sat_solver_addclause( pSat, pLits, pLits + Aig_ManCoNum(pCnf->pMan) ) )
+    if ( !Xcec_fraig_sat_solver_addclause( pSat, pLits, pLits + Aig_ManCoNum(pCnf->pMan) ) )
     {
         ABC_FREE( pLits );
         return 0;

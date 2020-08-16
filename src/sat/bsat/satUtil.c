@@ -22,6 +22,7 @@
 #include <assert.h>
 #include "satSolver.h"
 #include "satSolver2.h"
+#include "ext-ICCAD2020-ProblemA/xcec.h"
 
 ABC_NAMESPACE_IMPL_START
 
@@ -273,7 +274,7 @@ int * Sat_SolverGetModel( sat_solver * p, int * pVars, int nVars )
     int i;
     pModel = ABC_CALLOC( int, nVars+1 );
     for ( i = 0; i < nVars; i++ )
-        pModel[i] = sat_solver_var_value(p, pVars[i]);
+        pModel[i] = sat_solver_var_value( (void *)p, pVars[i]);
     return pModel;    
 }
 
