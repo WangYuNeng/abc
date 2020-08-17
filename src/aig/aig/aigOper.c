@@ -455,9 +455,16 @@ Aig_Obj_t * Aig_MiterTwo( Aig_Man_t * p, Vec_Ptr_t * vNodes1, Vec_Ptr_t * vNodes
     int i;
     assert( vNodes1->nSize > 0 && vNodes1->nSize > 0 );
     assert( vNodes1->nSize == vNodes2->nSize );
-    for ( i = 0; i < vNodes1->nSize; i++ )
+    assert( vNodes1->nSize %2 == 0 );
+    // for ( i = 0; i < vNodes1->nSize; i++ )
+        // vNodes1->pArray[i] = Aig_Not( Aig_Exor( p, (Aig_Obj_t *)vNodes1->pArray[i], (Aig_Obj_t *)vNodes2->pArray[i] ) );
+    // return Aig_Not( Aig_Multi_rec( p, (Aig_Obj_t **)vNodes1->pArray, vNodes1->nSize, AIG_OBJ_AND ) );
+    for ( i = 0; i < vNodes1->nSize; i+=2 ) {
         vNodes1->pArray[i] = Aig_Not( Aig_Exor( p, (Aig_Obj_t *)vNodes1->pArray[i], (Aig_Obj_t *)vNodes2->pArray[i] ) );
-    return Aig_Not( Aig_Multi_rec( p, (Aig_Obj_t **)vNodes1->pArray, vNodes1->nSize, AIG_OBJ_AND ) );
+        vNodes1->pArray[i] = Aig_And( p, (Aig_Obj_t *)vNodes1->pArray[i], Aig_Not( (Aig_Obj_t *)vNodes2->pArray[i+1] ) );
+        vNodes1->pArray[i/2] = Aig_Or( p, (Aig_Obj_t *)vNodes1->pArray[i], (Aig_Obj_t *)vNodes1->pArray[i+1] );
+    }
+    return Aig_Not( Aig_Multi_rec( p, (Aig_Obj_t **)vNodes1->pArray, (vNodes1->nSize)/2, AIG_OBJ_AND ) );
 }
 
 /**Function*************************************************************

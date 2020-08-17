@@ -316,7 +316,7 @@ ABC_PRT( "Time", Abc_Clock() - clk );
     pParams->nBTLimitMiter = nBTLimitStart;
     pParams->fDontShowBar = 1;
     pParams->fProve = 1;
-    for ( i = 0; i < 6; i++ )
+    for ( i = 0; i < 0; i++ )
     {
 //printf( "Running fraiging with %d BTnode and %d BTmiter.\n", pParams->nBTLimitNode, pParams->nBTLimitMiter );
         // try XOR balancing
@@ -403,12 +403,12 @@ int Fra_FraigCecPartitioned( Aig_Man_t * pMan1, Aig_Man_t * pMan2, int nConfLimi
     vParts = Aig_ManMiterPartitioned( pMan1, pMan2, nPartSize, fSmart );
     // solve the partitions
     nOutputs = -1;
-    Vec_PtrForEachEntry( Aig_Man_t *, vParts, pAig, i )
+    Vec_PtrForEachEntryReverse( Aig_Man_t *, vParts, pAig, i ) // TODO: sort
     {
         nOutputs++;
         if ( fVerbose )
         {
-            printf( "Verifying part %4d  (out of %4d)  PI = %5d. PO = %5d. And = %6d. Lev = %4d.\r", 
+            printf( "Verifying part %4d  (out of %4d)  PI = %5d. PO = %5d. And = %6d. Lev = %4d.\n", 
                 i+1, Vec_PtrSize(vParts), Aig_ManCiNum(pAig), Aig_ManCoNum(pAig), 
                 Aig_ManNodeNum(pAig), Aig_ManLevelNum(pAig) );
             fflush( stdout );
@@ -418,7 +418,7 @@ int Fra_FraigCecPartitioned( Aig_Man_t * pMan1, Aig_Man_t * pMan2, int nConfLimi
             continue;
         if ( RetValue == 0 )
             break;
-        RetValue = Fra_FraigCec( &pAig, nConfLimit, 0 );
+        RetValue = Fra_FraigCec( &pAig, nConfLimit, 1 );
         Vec_PtrWriteEntry( vParts, i, pAig );
         if ( RetValue == 1 )
             continue;
