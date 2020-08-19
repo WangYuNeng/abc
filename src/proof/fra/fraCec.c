@@ -239,7 +239,7 @@ int Fra_FraigSat( Aig_Man_t * pMan, ABC_INT64_T nConfLimit, ABC_INT64_T nInsLimi
             // pMan->pData = Xcec_mitersolver_get_model( pSat, vCiIds->pArray, vCiIds->nSize );
         }
         // free the sat_solver
-        Xcec_miter_solver_delete( pSat );
+        Xcec_fraig_sat_solver_delete( pSat );
         Vec_IntFree( vCiIds );
         return RetValue;
     }
