@@ -195,15 +195,25 @@ int Fra_FraigSat( Aig_Man_t * pMan, ABC_INT64_T nConfLimit, ABC_INT64_T nInsLimi
             return 1;
         }
 
-        Cnf_DataWriteOrClause( pSat, pCnf );
+        // Cnf_DataWriteOrClause( pSat, pCnf );
         vCiIds = Cnf_DataCollectPiSatNums( pCnf, pMan );
-        Cnf_DataFree( pCnf );
 
         // solve the miter
         clk = Abc_Clock();
         Xcec_fraig_sat_solver_simplify(pSat);
-        // status = Xcec_miter_solver_solve(pSat);
-        status = Xcec_fraig_sat_solver_solve( pSat, NULL, NULL, (ABC_INT64_T)__INT64_MAX__ );
+        Aig_Obj_t * pObj;
+        int i, pLits[1];
+        Aig_ManForEachCoReverse( pMan, pObj, i ) {
+            printf("Verifying output (%d/%d)...\n", i+1, Aig_ManCoNum(pMan) );
+            pLits[0] = toLitCond( pCnf->pVarNums[pObj->Id], 0 );
+            status = Xcec_fraig_sat_solver_solve( pSat, pLits, pLits+1, (ABC_INT64_T)__INT64_MAX__ );
+            if (status == l_True)
+                return 0;
+            pLits[0] = toLitCond( pCnf->pVarNums[pObj->Id], 1 );
+            Xcec_fraig_sat_solver_addclause( pSat, pLits, pLits+1);
+            Xcec_fraig_sat_solver_simplify(pSat);
+        }
+        Cnf_DataFree( pCnf );
         if ( status == l_Undef )
         {
     //        printf( "The problem timed out.\n" );
@@ -321,7 +331,7 @@ ABC_PRT( "Time", Abc_Clock() - clk );
     pParams->nBTLimitMiter = nBTLimitStart;
     pParams->fDontShowBar = 1;
     pParams->fProve = 1;
-    for ( i = 0; i < 6; i++ )
+    for ( i = 0; i < 0; i++ )
     {
 //printf( "Running fraiging with %d BTnode and %d BTmiter.\n", pParams->nBTLimitNode, pParams->nBTLimitMiter );
         // try XOR balancing
