@@ -271,9 +271,16 @@ int Fra_FraigCec( Aig_Man_t ** ppAig, int nConfLimit, int fVerbose )
 
     Fra_Par_t Params, * pParams = &Params;
     Aig_Man_t * pAig = *ppAig, * pTemp;
+
+    //The duplicated circuit for fraiging 
+    Aig_Man_t * pAigFraig;
+    
+    //Decide which circuit to return, pAig or pAigFraig;
+    int retFraig = 0;
+
     int i, RetValue;
     abctime clk;
-
+    
     // report the original miter
     if ( fVerbose )
     {
@@ -310,57 +317,68 @@ clk = Abc_Clock();
 ABC_PRT( "Time", Abc_Clock() - clk );
     }
 
+    //Duplicate the original circuit to do fraiging 
+    pAigFraig = Aig_ManDupDfs( pAig );
+
     // perform the loop
     Fra_ParamsDefault( pParams );
     pParams->nBTLimitNode = nBTLimitFirst;
     pParams->nBTLimitMiter = nBTLimitStart;
     pParams->fDontShowBar = 1;
     pParams->fProve = 1;
-    for ( i = 0; i < 6; i++ )
+
+    //Fraig 1 time
+    for ( i = 0; i < 1; i++ )
     {
 //printf( "Running fraiging with %d BTnode and %d BTmiter.\n", pParams->nBTLimitNode, pParams->nBTLimitMiter );
         // try XOR balancing
-        if ( Aig_ManCountXors(pAig) * 30 > Aig_ManNodeNum(pAig) + 300 )
+        if ( Aig_ManCountXors(pAigFraig) * 30 > Aig_ManNodeNum(pAigFraig) + 300 )
         {
 clk = Abc_Clock();
-            pAig = Dar_ManBalanceXor( pTemp = pAig, 1, 0, 0 );
+            pAigFraig = Dar_ManBalanceXor( pTemp = pAigFraig, 1, 0, 0 );
             Aig_ManStop( pTemp );
             if ( fVerbose )
             {
-                printf( "Balance-X:        Nodes = %6d.  ", Aig_ManNodeNum(pAig) );
+                printf( "Balance-X:        Nodes = %6d.  ", Aig_ManNodeNum(pAigFraig) );
 ABC_PRT( "Time", Abc_Clock() - clk );
             } 
         }
 
         // run fraiging
 clk = Abc_Clock();
-        pAig = Fra_FraigPerform( pTemp = pAig, pParams );
+        pAigFraig = Fra_FraigPerform( pTemp = pAigFraig, pParams );
         Aig_ManStop( pTemp );
         if ( fVerbose )
         {
-            printf( "Fraiging (i=%d):   Nodes = %6d.  ", i+1, Aig_ManNodeNum(pAig) );
+            printf( "Fraiging (i=%d):   Nodes = %6d.  ", i+1, Aig_ManNodeNum(pAigFraig) );
 ABC_PRT( "Time", Abc_Clock() - clk );
         }
 
         // check the miter status
-        RetValue = Fra_FraigMiterStatus( pAig );
+        RetValue = Fra_FraigMiterStatus( pAigFraig );
         if ( RetValue >= 0 )
+        {
+            retFraig = 1;
             break;
+        }
 
         // perform rewriting
 clk = Abc_Clock();
-        pAig = Dar_ManRewriteDefault( pTemp = pAig );
+        pAigFraig = Dar_ManRewriteDefault( pTemp = pAigFraig );
         Aig_ManStop( pTemp );
         if ( fVerbose )
         {
-            printf( "Rewriting:        Nodes = %6d.  ", Aig_ManNodeNum(pAig) );
+            printf( "Rewriting:        Nodes = %6d.  ", Aig_ManNodeNum(pAigFraig) );
 ABC_PRT( "Time", Abc_Clock() - clk );
         } 
 
         // check the miter status
-        RetValue = Fra_FraigMiterStatus( pAig );
+        RetValue = Fra_FraigMiterStatus( pAigFraig );
         if ( RetValue >= 0 )
+        {
+            retFraig = 1;
             break;
+        }
         // try simulation
 
         // set the parameters for the next run
@@ -378,8 +396,8 @@ clk = Abc_Clock();
 ABC_PRT( "Time", Abc_Clock() - clk );
         }
     }
-
-    *ppAig = pAig;
+    
+    *ppAig = retFraig ? pAigFraig : pAig;
     return RetValue;
 }
 
