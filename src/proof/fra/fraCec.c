@@ -177,6 +177,7 @@ int Fra_FraigSat( Aig_Man_t * pMan, ABC_INT64_T nConfLimit, ABC_INT64_T nInsLimi
         pCnf = Cnf_Derive( pMan, Aig_ManCoNum(pMan) );
     //    pCnf = Cnf_DeriveSimple( pMan, Aig_ManCoNum(pMan) );
 
+
         if ( fFlipBits ) 
             Cnf_DataTranformPolarity( pCnf, 0 );
 
@@ -196,6 +197,9 @@ int Fra_FraigSat( Aig_Man_t * pMan, ABC_INT64_T nConfLimit, ABC_INT64_T nInsLimi
 
         vCiIds = Cnf_DataCollectPiSatNums( pCnf, pMan );
         Cnf_DataFree( pCnf );
+
+        // Do simulation and add block clauses
+        Xcec_FraCecSim( pMan , nConfLimit , pSat , vCiIds);
 
         // solve the miter
         clk = Abc_Clock();
@@ -316,7 +320,10 @@ ABC_PRT( "Time", Abc_Clock() - clk );
     pParams->nBTLimitMiter = nBTLimitStart;
     pParams->fDontShowBar = 1;
     pParams->fProve = 1;
-    for ( i = 0; i < 6; i++ )
+
+    //Disable fraiging 
+    //for ( i = 0; i < 6; i++ )
+    for ( i = 0; i < 0; i++ )
     {
 //printf( "Running fraiging with %d BTnode and %d BTmiter.\n", pParams->nBTLimitNode, pParams->nBTLimitMiter );
         // try XOR balancing
