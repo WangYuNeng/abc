@@ -112,6 +112,17 @@ Aig_Man_t * Dar_ManRwsat( Aig_Man_t * pAig, int fBalance, int fVerbose )
     if ( Time && Abc_Clock() > Time )
         { if ( pAig ) Aig_ManStop( pAig ); return NULL; }
 
+    // balance
+    if ( fBalance )
+    {
+    pAig->Time2Quit = Time;
+    pAig = Dar_ManBalance( pTemp = pAig, 0 );
+    Aig_ManStop( pTemp );
+    if ( fVerbose ) printf( "Balance:   " ), Aig_ManPrintStats( pAig );
+    if ( Time && Abc_Clock() > Time )
+        { if ( pAig ) Aig_ManStop( pAig ); return NULL; }
+    }
+
 //printf( "4" );
     // refactor
     pAig->Time2Quit = Time;
@@ -145,6 +156,17 @@ Aig_Man_t * Dar_ManRwsat( Aig_Man_t * pAig, int fBalance, int fVerbose )
         { if ( pAig ) Aig_ManStop( pAig ); return NULL; }
 
 //printf( "7" );
+    // balance
+    if ( fBalance )
+    {
+    pAig->Time2Quit = Time;
+    pAig = Dar_ManBalance( pTemp = pAig, 0 );
+    Aig_ManStop( pTemp );
+    if ( fVerbose ) printf( "Balance:   " ), Aig_ManPrintStats( pAig );
+    if ( Time && Abc_Clock() > Time )
+        { if ( pAig ) Aig_ManStop( pAig ); return NULL; }
+    }
+
     return pAig;
 }
 

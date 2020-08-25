@@ -302,7 +302,10 @@ ABC_PRT( "Time", Abc_Clock() - clk );
 
     // duplicate the AIG
 clk = Abc_Clock();
+    
+    // Modified Dar_ManRwsat to  do initial  2 rewrites, 4 balances, 1 refactor
     pAig = Dar_ManRwsat( pTemp = pAig, 1, 0 );
+
     Aig_ManStop( pTemp );
     if ( fVerbose )
     {
@@ -316,7 +319,10 @@ ABC_PRT( "Time", Abc_Clock() - clk );
     pParams->nBTLimitMiter = nBTLimitStart;
     pParams->fDontShowBar = 1;
     pParams->fProve = 1;
-    for ( i = 0; i < 6; i++ )
+    
+    // Disable Fraiging loop
+    //for ( i = 0; i < 6; i++ )
+    for ( i = 0; i < 0; i++ )
     {
 //printf( "Running fraiging with %d BTnode and %d BTmiter.\n", pParams->nBTLimitNode, pParams->nBTLimitMiter );
         // try XOR balancing
