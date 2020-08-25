@@ -398,6 +398,8 @@ ABC_PRT( "Time", Abc_Clock() - clk );
     }
     
     *ppAig = retFraig ? pAigFraig : pAig;
+    Aig_ManStop( (retFraig ? pAig : pAigFraig ));
+
     return RetValue;
 }
 
