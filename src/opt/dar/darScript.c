@@ -116,7 +116,7 @@ Aig_Man_t * Dar_ManRwsat( Aig_Man_t * pAig, int fBalance, int fVerbose )
     if ( fBalance )
     {
     pAig->Time2Quit = Time;
-    pAig = Dar_ManBalance( pTemp = pAig, 1);
+    pAig = Dar_ManBalance( pTemp = pAig, 2 );
     Aig_ManStop( pTemp );
     if ( fVerbose ) printf( "Balance:   " ), Aig_ManPrintStats( pAig );
     if ( Time && Abc_Clock() > Time )
@@ -160,7 +160,7 @@ Aig_Man_t * Dar_ManRwsat( Aig_Man_t * pAig, int fBalance, int fVerbose )
     if ( fBalance )
     {
     pAig->Time2Quit = Time;
-    pAig = Dar_ManBalance( pTemp = pAig, 1);
+    pAig = Dar_ManBalance( pTemp = pAig, 2 );
     Aig_ManStop( pTemp );
     if ( fVerbose ) printf( "Balance:   " ), Aig_ManPrintStats( pAig );
     if ( Time && Abc_Clock() > Time )
